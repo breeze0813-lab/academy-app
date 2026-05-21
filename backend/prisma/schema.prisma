@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
+}h
 
 enum Role {
   ADMIN
@@ -153,6 +153,8 @@ model AssignmentSubmission {
   assignmentId Int
   student      User       @relation(fields: [studentId], references: [id])
   studentId    Int
+
+  @@unique([assignmentId, studentId])
 }
 
 model Grade {
