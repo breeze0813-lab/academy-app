@@ -11,55 +11,52 @@ const navItems: { id: Page; label: string; emoji: string }[] = [
   { id: 'attendance', label: '출결 관리', emoji: '✅' },
   { id: 'invoices', label: '수납 관리', emoji: '💰' },
   { id: 'notices', label: '공지사항', emoji: '📢' },
-  ];
+];
 
 export default function App() {
-    const [currentPage, setCurrentPage] = useState<Page>('assignments');
+  const [currentPage, setCurrentPage] = useState<Page>('assignments');
 
   const renderPage = () => {
-        switch (currentPage) {
-          case 'assignments': return <Assignments />;
-          case 'attendance': return <Attendance />;
-          case 'invoices': return <Invoices />;
-          case 'notices': return <Notices />;
-          default: return <Assignments />;
-        }
+    switch (currentPage) {
+      case 'assignments': return <Assignments />;
+      case 'attendance': return <Attendance />;
+      case 'invoices': return <Invoices />;
+      case 'notices': return <Notices />;
+      default: return <Assignments />;
+    }
   };
 
   return (
-        <div className="min-h-screen bg-gray-50">
-          {/* Header */}
-              <header className="bg-white border-b border-gray-200 shadow-sm">
-                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                <div className="flex items-center justify-between h-16">
-                                            <div className="flex items-center gap-3">
-                                                          <span className="text-2xl">🏫</span>span>
-                                                          <h1 className="text-xl font-bold text-gray-900">Academy App</h1>h1>
-                                            </div>div>
-                                            <nav className="flex gap-1">
-                                              {navItems.map((item) => (
-                          <button
-                                              key={item.id}
-                                              onClick={() => setCurrentPage(item.id)}
-                                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                                    currentPage === item.id
-                                                                      ? 'bg-primary-100 text-primary-700'
-                                                                      : 'text-gray-600 hover:bg-gray-100'
-                                              }`}
-                                            >
-                                            <span className="mr-1">{item.emoji}</span>span>
-                            {item.label}
-                          </button>button>
-                        ))}
-                                            </nav>nav>
-                                </div>div>
-                      </div>div>
-              </header>header>
-        
-          {/* Main Content */}
-              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {renderPage()}
-              </main>main>
-        </div>div>
-      );
-}</div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏫</span>
+              <h1 className="text-xl font-bold text-gray-900">Academy App</h1>
+            </div>
+            <nav className="flex gap-1">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentPage(item.id)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === item.id
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="mr-1">{item.emoji}</span>
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </header>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {renderPage()}
+      </main>
+    </div>
+  );
+}
