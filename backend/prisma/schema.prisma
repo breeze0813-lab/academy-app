@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EARLY_LEAVE
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+}
+
+enum NoticeTarget {
+  ALL
+  CLASS
+  INDIVIDUAL
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  ownedAcademy   Academy?               @relation("AcademyOwner")
+  taughtClasses  Class[]                @relation("ClassTeacher")
+  studentClasses StudentClass[]
+  attendances    Attendance[]
+  invoices       Invoice[]
+  submissions    AssignmentSubmission[]
+  grades         Grade[]
+  notices        Notice[]
+  messages       Message[]
+  children       FamilyLink[]           @relation("ParentLinks")
+  parents        FamilyLink[]           @relation("StudentLinks")
+}
+
+model FamilyLink {
+  id        Int  @id @default(autoincrement())
+  parent    User @relation("ParentLinks", fields: [parentId], references: [id])
+  parentId  Int
+  student   User @relation("StudentLinks", fields: [studentId], references: [id])
+  studentId Int
+}
+
+model Academy {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  phone     String?
+  owner     User     @relation("AcademyOwner", fields: [ownerId], references: [id])
+  ownerId   Int      @unique
+  createdAt DateTime @default(now())
+
+  classes  Class[]
+  invoices Invoice[]
+  notices  Notice[]
+}
+
+model Class {
+  id        Int      @id @default(autoincrement())
+  name      String
+  subject   String?
+  schedule  String?
+  academy   Academy  @relation(fields: [academyId], references: [id])
+  academyId Int
+  teacher   User?    @relation("ClassTeacher", fields: [teacherId], references: [id])
+  teacherId Int?
+  createdAt DateTime @default(now())
+
+  students    StudentClass[]
+  attendances Attendance[]
+  assignments Assignment[]
+  grades      Grade[]
+  chatRoom    ChatRoom?
+}
+
+model StudentClass {
+  id         Int      @id @default(autoincrement())
+  student    User     @relation(fields: [studentId], references: [id])
+  studentId  Int
+  class      Class    @relation(fields: [classId], references: [id])
+  classId    Int
+  enrolledAt DateTime @default(now())
+
+  @@unique([studentId, classId])
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  date      DateTime
+  status    AttendanceStatus
+  memo      String?
+  student   User             @relation(fields: [studentId], references: [id])
+  studentId Int
+  class     Class            @relation(fields: [classId], references: [id])
+  classId   Int
+  createdAt DateTime         @default(now())
+}
+
+model Invoice {
+  id         Int           @id @default(autoincrement())
+  month      String
+  tuitionFee Int
+  extraFee   Int           @default(0)
+  totalFee   Int
+  dueDate    DateTime
+  status     InvoiceStatus @default(UNPAID)
+  paidAt     DateTime?
+  student    User          @relation(fields: [studentId], references: [id])
+  studentId  Int
+  academy    Academy       @relation(fields: [academyId], references: [id])
+  academyId  Int
+  createdAt  DateTime      @default(now())
+}
+
+model Assignment {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  dueDate   DateTime
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   Int
+  createdAt DateTime @default(now())
+
+  submissions AssignmentSubmission[]
+}
+
+model AssignmentSubmission {
+  id           Int        @id @default(autoincrement())
+  content      String?
+  submittedAt  DateTime   @default(now())
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId Int
+  student      User       @relation(fields: [studentId], references: [id])
+  studentId    Int
+}
+
+model Grade {
+  id        Int      @id @default(autoincrement())
+  examName  String
+  score     Float
+  maxScore  Float    @default(100)
+  examDate  DateTime
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId Int
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   Int
+  createdAt DateTime @default(now())
+}
+
+model Notice {
+  id         Int          @id @default(autoincrement())
+  title      String
+  content    String
+  targetType NoticeTarget @default(ALL)
+  targetId   Int?
+  academy    Academy      @relation(fields: [academyId], references: [id])
+  academyId  Int
+  author     User         @relation(fields: [authorId], references: [id])
+  authorId   Int
+  createdAt  DateTime     @default(now())
+}
+
+model ChatRoom {
+  id      Int       @id @default(autoincrement())
+  class   Class     @relation(fields: [classId], references: [id])
+  classId Int       @unique
+  messages Message[]
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoomId Int
+  sender     User     @relation(fields: [senderId], references: [id])
+  senderId   Int
+  createdAt  DateTime @default(now())
+}
